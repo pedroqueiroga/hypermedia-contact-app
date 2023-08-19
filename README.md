@@ -1,6 +1,6 @@
-# Hypermedia Contact App
+# Hypermedia Driven Contact App
 
-A Hypermedia Contact App in Elixir/Phoenix. Originally appears in [hypermedia.systems](https://hypermedia.systems/) as a Python/Flask application.
+A Hypermedia Driven Contact App in Elixir/Phoenix. Originally appears in [hypermedia.systems](https://hypermedia.systems/) as a Python/Flask application.
 
 ## About Phoenix
 
