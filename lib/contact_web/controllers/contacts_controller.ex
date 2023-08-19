@@ -13,7 +13,7 @@ defmodule ContactWeb.ContactsController do
 
   def contacts(conn, _params) do
     q = get_query_param(conn, "q")
-    render(conn, :contacts, layout: false, contacts:
+    render(conn, :contacts, contacts:
       case Integer.parse(q) do
         {id, ""} ->
           Enum.filter(Contact.Repo.all(Contact.Contact), fn contact -> contact.id == id end)
@@ -24,7 +24,7 @@ defmodule ContactWeb.ContactsController do
   end
 
   def contacts_new_get(conn, _params) do
-    render(conn, :contacts_new, layout: false, contact: Map.merge(%Contact.Contact{}, %{errors: %{}}))
+    render(conn, :contacts_new, contact: Map.merge(%Contact.Contact{}, %{errors: %{}}))
   end
   
   def contacts_new_post(conn, %{"email" => email,
@@ -41,16 +41,16 @@ defmodule ContactWeb.ContactsController do
         |> put_flash(:info, "#{response.email} created!")
         |> redirect(to: ~p"/contacts")
       {:error, response} ->
-        render(conn, :contacts_new, layout: false, contact: response)
+        render(conn, :contacts_new, contact: response)
     end
   end
 
   def contacts_view(conn, %{"id" => id}) do
-    render(conn, :contacts_view, layout: false, contact: Contact.Repo.get(Contact.Contact, id))
+    render(conn, :contacts_view, contact: Contact.Repo.get(Contact.Contact, id))
   end
 
   def contacts_edit(conn, %{"id" => id}) do
-    render(conn, :contacts_edit, layout: false, contact: Map.merge(Contact.Repo.get(Contact.Contact, id), %{errors: %{}}))
+    render(conn, :contacts_edit, contact: Map.merge(Contact.Repo.get(Contact.Contact, id), %{errors: %{}}))
   end
 
   def contacts_edit_post(conn, %{"email" => email,
@@ -71,7 +71,7 @@ defmodule ContactWeb.ContactsController do
         |> put_flash(:info, "Updated Contact!")
         |> redirect(to: ~p"/contacts/#{contact.id}")
       {:error, response} ->
-        render(conn, :contacts_edit, layout: false, contact: response)
+        render(conn, :contacts_edit, contact: response)
     end
   end
 
@@ -80,10 +80,12 @@ defmodule ContactWeb.ContactsController do
       {:ok, _contact} ->
         conn
         |> put_flash(:info, "Deleted Contact!")
+        |> put_status(303)
         |> redirect(to: ~p"/contacts")
       {:error, _response} ->
         conn
         |> put_flash(:error, "Could not delete contact")
+        |> put_status(303)
         |> redirect(to: ~p"/contacts/#{id}")
     end
   end
