@@ -30,18 +30,27 @@ defmodule ContactWeb.ContactsController do
   def contacts_new_post(conn, %{"email" => email,
                                 "phone" => phone,
                                 "first_name" => first,
-                                "last_name" => last}) do
-    case Contact.Repo.insert(%Contact.Contact{
-              email: email,
-              phone: phone,
-              first: first,
-              last: last}) do
+                                "last_name" => last} \\ %{}) do
+    params = %{
+      email: email,
+      phone: phone,
+      first: first,
+      last: last}
+    contact = try do %Contact.Contact{} |> Contact.Contact.changeset(params)
+              rescue
+                KeyError ->
+                  Contact.Contact.create_contact(params)
+              end
+    case contact |> Contact.Repo.insert do
       {:ok, response} ->
         conn
         |> put_flash(:info, "#{response.email} created!")
         |> redirect(to: ~p"/contacts")
       {:error, response} ->
-        render(conn, :contacts_new, contact: response)
+        errors = response.errors |> Enum.into(%{}, fn {k, v} -> {k, v |> elem(0)} end)
+        conn
+        |> put_flash(:error, "Error registering contact!")
+        |> render(:contacts_new, contact: Map.merge(Contact.Contact.create_contact(response.changes), %{errors: errors}))
     end
   end
 
@@ -59,19 +68,24 @@ defmodule ContactWeb.ContactsController do
                                  "last_name" => last,
                                  "id" => id}) do
     contact = Contact.Repo.get(Contact.Contact, id)
-    contact_changeset = Contact.Contact.changeset(contact, %{
-          email: email,
-          phone: phone,
-          first: first,
-          last: last,
-          id: id})
+    attrs = %{
+      email: email,
+      phone: phone,
+      first: first,
+      last: last,
+      id: id
+    }
+    contact_changeset = Contact.Contact.changeset(contact, attrs)
     case Contact.Repo.update(contact_changeset) do
       {:ok, contact} ->
         conn
         |> put_flash(:info, "Updated Contact!")
         |> redirect(to: ~p"/contacts/#{contact.id}")
       {:error, response} ->
-        render(conn, :contacts_edit, contact: response)
+        errors = response.errors |> Enum.into(%{}, fn {k, v} -> {k, v |> elem(0)} end)
+        conn
+        |> put_flash(:error, "Error updating contact!")
+        |> render(:contacts_edit, contact: Map.merge(attrs, %{errors: errors}))
     end
   end
 

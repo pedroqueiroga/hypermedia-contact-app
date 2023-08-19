@@ -17,4 +17,16 @@ defmodule Contact.Contact do
     |> cast(attrs, [:first, :last, :email, :phone])
     |> validate_required([:first, :last, :email, :phone])
   end
+
+  def empty_str_if_nil(v) when v == nil do "" end
+  def empty_str_if_nil(v) do v end
+
+  def create_contact(attrs \\ %{}) do
+    %{
+      first: empty_str_if_nil(attrs[:first]),
+      last: empty_str_if_nil(attrs[:last]),
+      email: empty_str_if_nil(attrs[:email]),
+      phone: empty_str_if_nil(attrs[:phone])
+    }
+  end
 end
